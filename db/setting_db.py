@@ -6,20 +6,21 @@ import config.settings as settings
 sys.path.append("../..")
 
 def create_table():
-    conn = sqlite3.connect('db.db')
+    conn = sqlite3.connect(settings.db_path)
     cursor = conn.cursor()
     cursor.execute('''CREATE TABLE user
                         (id text PRIMARY KEY, password text, name text, email text, phone text, admin integer)''') # admin: 0 - 일반 사용자, 1 - 관리자
     cursor.execute('''CREATE TABLE notice
-                        (id INTEGER PRIMARY KEY AUTOINCREMENT, title text, content text, date text, writerid text)''')
+                        (id INTEGER PRIMARY KEY AUTOINCREMENT, title text, content text, date text, writerid text, views integer)''')
     cursor.execute('''CREATE TABLE post
-                        (id INTEGER PRIMARY KEY AUTOINCREMENT, title text, content text, date text, writerid text, up integer, down integer)''')
+                        (id INTEGER PRIMARY KEY AUTOINCREMENT, title text, content text, date text, writerid text, up integer, down integer, views integer)''')
     cursor.execute('''CREATE TABLE comment 
                         (id INTEGER PRIMARY KEY AUTOINCREMENT, content text, date text, writerid text, postid integer)''')
     cursor.execute('''CREATE TABLE iplogs
                         (userid text, ip text, date text)''')
     cursor.execute('''CREATE TABLE logs
                         (userid text, date text, action text)''')
+    # all date is in format 'YYYYMMDDHHMMSS'
     conn.commit()
     conn.close()
 

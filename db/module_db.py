@@ -1,6 +1,11 @@
 import sqlite3
+import datetime
+import sys
+sys.path.append("..")
+import config.settings as settings
+sys.path.append("../..")
 
-db_path = "db.db"
+db_path = settings.db_path
 
 def insert_user(id, password, name, email, phone, admin=False):
     admin = 1 if admin else 0
@@ -27,7 +32,7 @@ def select_user(id):
 def insert_notice(title, content, date, writerid):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO notice VALUES (NULL, ?, ?, ?, ?)", (title, content, date, writerid))
+    cursor.execute("INSERT INTO notice VALUES (NULL, ?, ?, ?, ?, 0)", (title, content, date, writerid))
     try:
         cursor.execute("SELECT * FROM notice WHERE title=? AND content=? AND date=? AND writerid=?", (title, content, date, writerid))
         result = cursor.fetchone()
@@ -45,10 +50,18 @@ def select_notice(id):
     conn.close()
     return result
 
+def get_notices(number):
+    con = sqlite3.connect(db_path)
+    cur = con.cursor()
+    cur.execute("SELECT * FROM notice ORDER BY id DESC LIMIT ?", (number,))
+    result = cur.fetchall()
+    con.close()
+    return result
+
 def insert_post(title, content, date, writerid):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO post VALUES (NULL, ?, ?, ?, ?, 0, 0)", (title, content, date, writerid))
+    cursor.execute("INSERT INTO post VALUES (NULL, ?, ?, ?, ?, 0, 0, 0)", (title, content, date, writerid))
     try:
         cursor.execute("SELECT * FROM post WHERE title=? AND content=? AND date=? AND writerid=?", (title, content, date, writerid))
         result = cursor.fetchone()
@@ -64,6 +77,22 @@ def select_post(id):
     cursor.execute("SELECT * FROM post WHERE id=?", (id,))
     result = cursor.fetchone()
     conn.close()
+    return result
+
+def get_posts(number):
+    con = sqlite3.connect(db_path)
+    cur = con.cursor()
+    cur.execute("SELECT * FROM post ORDER BY id DESC LIMIT ?", (number,))
+    result = cur.fetchall()
+    con.close()
+    return result
+
+def get_up_posts(number, date): # 숫자, date 이후의 up 높은 순서대로
+    con = sqlite3.connect(db_path)
+    cur = con.cursor()
+    cur.execute("SELECT * FROM post WHERE (cast(date as integer) > ?) ORDER BY up DESC LIMIT ? ", (date, number))
+    result = cur.fetchall()
+    con.close()
     return result
 
 def insert_comment(content, date, writerid, postid):
