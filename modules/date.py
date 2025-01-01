@@ -10,3 +10,6 @@ def date_sliser(date):
         'second': date[12:14]
     }
     return date
+
+def make_date_text(slice_date):
+    return f"{slice_date['month']}/{slice_date['day']} {slice_date['hour']}:{slice_date['minute']}"

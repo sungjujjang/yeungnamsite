@@ -130,8 +130,9 @@ def insert_comment(content, date, writerid, postid):
 def select_comment(id):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM comment WHERE postid=?", (id,))
-    result = cursor.fetchone()
+    # date 순으로 정렬
+    cursor.execute("SELECT * FROM comment WHERE postid=? ORDER BY id DESC", (id,))
+    result = cursor.fetchall()
     conn.close()
     return result
 

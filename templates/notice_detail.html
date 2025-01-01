@@ -10,12 +10,19 @@
         body {
             font-family: 'Roboto', sans-serif;
         }
+        .datetext {
+            text-align: right;
+            font-size: 0.8rem;
+            color: #666;
+            padding-top: -1rem;
+        }
     </style>
 </head>
 <body class="bg-gray-100 p-6">
     <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
         <a href="/notice" class="text-blue-500 hover:underline mb-4 inline-block">Go back</a>
         <h1 class="text-xl font-bold mb-4">영남소식 - {{ notice[1] }}</h1>
+        <strong class="text-lg font-bold mb-2">{{ notice[4] }} - {{ datetext }}</strong>
         <div class="border p-4 mb-4">
             {{ notice[2] }}
         </div>
@@ -26,9 +33,32 @@
         </div>
         <div>
             {% for comment in comments %}
-            <p><strong>{{ comment[1] }}</strong>: {{ comment[2] }}</p>
+            <p><strong>{{ comment[3] }}</strong>: {{ comment[1] }}<p class="datetext">{{ comment[2] }}</p></p>
             {% endfor %}
         </div>
     </div>
+    <script>
+        document.querySelector('button').addEventListener('click', function() {
+            var comment = document.querySelector('textarea').value;
+            if (comment) {
+                fetch('{{ url_for("notice_commit") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        comment: comment,
+                        noticeid: {{ notice[0] }}
+                     })
+                })
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(data) {
+                    location.reload();
+                });
+            }
+        });
+    </script>
 </body>
 </html>

@@ -3,6 +3,7 @@ from flask import request, jsonify, Response, render_template, redirect, url_for
 import db.module_db as module_db
 import config.settings as settings
 import sqlite3, datetime
+import modules.date as date
 
 def start_db():
     con = sqlite3.connect(settings.db_path)
@@ -117,8 +118,25 @@ def admin_page():
 
 @app.route('/notice')
 def notice_page():
-    notices = module_db.get_all_notices()
-    return render_template('notice.html', notices=notices)
+    # get query page
+    page = request.args.get('page')
+    if page is None:
+        page = 1
+    else:
+        page = int(page)
+    all_notices = module_db.get_all_notices()
+    notices = all_notices[(page-1)*10:page*10]
+    o_lenpage = int(len(all_notices) / 10 + 1)
+    lenpage = range(1, o_lenpage)
+    if o_lenpage > 6:
+        if page < 4:
+            r_lenpage = lenpage[:6]
+        else:
+            r_lenpage = lenpage[int(page)-3:int(page)+3]
+    else:
+        r_lenpage = lenpage
+    print(lenpage)
+    return render_template('notice.html', notices=notices, lenpage=r_lenpage, page=page)
 
 @app.route('/notice/<int:id>')
 def notice_detail(id):
@@ -130,7 +148,25 @@ def notice_detail(id):
         lencom = 0
     if comments is None:
         comments = []
-    return render_template('notice_detail.html', notice=notice, comments=comments, lencom=lencom)
+    datetext = date.make_date_text(date.date_sliser(notice[3]))
+    for i in range(len(comments)):
+        comments[i] = list(comments[i])
+        comments[i][2] = date.make_date_text(date.date_sliser(comments[i][2]))
+    return render_template('notice_detail.html', notice=notice, comments=comments, lencom=lencom, datetext=datetext)
+
+@app.route('/apiweb/notice/commit', methods=['POST'])
+def notice_commit():
+    if session.get('id'):
+        id = session['id']
+    else:
+        id = '.'.join(request.remote_addr.split('.')[0:2])
+    data = request.get_json()
+    comment = data['comment']
+    noticeid = data['noticeid']
+    td = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+    module_db.insert_comment(comment, td, id, noticeid)
+    return jsonify(message="댓글이 등록되었습니다.")
+    
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, debug=True)
