@@ -29,6 +29,8 @@ def home():
 
 @app.route('/apiweb/login', methods=['POST'])
 def login():
+    if session.get('id'):
+        return redirect(url_for('home'))
     print(request.form)
     id = request.form['id']
     password = request.form['pw']
@@ -51,6 +53,54 @@ def logout():
     module_db.insert_log(session['id'], "logout", td)
     session.pop('id', None)
     return redirect(url_for('home'))
+
+@app.route('/register', methods=['GET'])
+def register_page():
+    if session.get('id'):
+        return redirect(url_for('home'))
+    return render_template('register.html')
+
+@app.route('/apiweb/checkgung', methods=['POST'])
+def checkgung():
+    params = request.get_json()
+    _id = params['id']
+    print(type(_id), _id)
+    if module_db.checkgung(_id):
+        return jsonify(message="사용 불가능한 아이디 입니다. 이미 사용 중 입니다.")
+    else:
+        return jsonify(message ="사용 가능한 아이디 입니다다.")
+    
+
+@app.route('/apiweb/register', methods=['POST'])
+def register():
+    if session.get('id'):
+        return redirect(url_for('home'))
+    name = request.form['name']
+    username = request.form['username']
+    password = request.form['password']
+    passwordconfirm = request.form['confirmPassword']
+    try:
+        email = request.form['email']
+    except:
+        email = "no"
+    try:
+        tel = request.form['tel']
+    except:
+        tel = "no"
+    if password != passwordconfirm:
+        return """<script>alert("비밀번호가 일치하지 않습니다");location.href="/register";</script>"""
+    else:
+        try:
+            data = module_db.insert_user(username, password, name, email, tel)
+        except:
+            return """<script>alert("이미 있는 아이디입니다.");location.href="/register";</script>"""
+        else:
+            session['id'] = username
+            td = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+            module_db.insert_log(username, "register", td)
+            module_db.insert_iplog(username, request.remote_addr, td)
+            return """<script>alert("가입에 성공했습니다. 축하합니다!");location.href="/";</script>"""
+    
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, debug=True)

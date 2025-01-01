@@ -44,9 +44,9 @@
                         <input type="text" id="id" name="id" placeholder="아이디" class="w-full border border-gray-300 p-2 rounded-md">
                     </div>
                     <div class="mb-2">
-                        <input type="password" id="pw" name = "pw" placeholder="비밀번호" class="w-full border border-gray-300 p-2 rounded-md">
+                        <input type="password" id="pw" name="pw" placeholder="비밀번호" class="w-full border border-gray-300 p-2 rounded-md">
                     </div>
-                    <a href="/api/register" class="text-blue-500">회원가입</a>
+                    <a href="{{ url_for('register_page') }}" class="text-blue-500">회원가입</a>
                     <button type="submit" class="w-full bg-blue-500 text-white p-2 rounded-md">로그인</button>
                 </form>
                 {% else %}

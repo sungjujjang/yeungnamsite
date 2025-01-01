@@ -142,6 +142,18 @@ def insert_log(userid, action, date):
     conn.close()
     return result
 
+def checkgung(userid):
+    print(userid)
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM user WHERE id=?", (userid,))
+    result = cursor.fetchone()
+    conn.close()
+    if result:
+        return True
+    else:
+        return False
+
 def get_logs(id):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
