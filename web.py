@@ -115,5 +115,22 @@ def admin_page():
     # print(logs)
     return render_template('admin.html', logs=logs)
 
+@app.route('/notice')
+def notice_page():
+    notices = module_db.get_all_notices()
+    return render_template('notice.html', notices=notices)
+
+@app.route('/notice/<int:id>')
+def notice_detail(id):
+    notice = module_db.select_notice(id)
+    comments = module_db.select_comment(id)
+    try:
+        lencom = len(comments)
+    except:
+        lencom = 0
+    if comments is None:
+        comments = []
+    return render_template('notice_detail.html', notice=notice, comments=comments, lencom=lencom)
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, debug=True)

@@ -69,6 +69,14 @@ def get_notices(number):
     con.close()
     return result
 
+def get_all_notices():
+    con = sqlite3.connect(db_path)
+    cur = con.cursor()
+    cur.execute("SELECT * FROM notice ORDER BY id DESC")
+    result = cur.fetchall()
+    con.close()
+    return result
+
 def insert_post(title, content, date, writerid):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
