@@ -101,6 +101,19 @@ def register():
             module_db.insert_iplog(username, request.remote_addr, td)
             return """<script>alert("가입에 성공했습니다. 축하합니다!");location.href="/";</script>"""
     
+@app.route('/introduction')
+def introduction_page():
+    return render_template('introduction.html')
+
+@app.route('/admin')
+def admin_page():
+    if session.get('id') is None:
+        return redirect(url_for('home'))
+    if not module_db.check_admin(session['id']):
+        return redirect(url_for('home'))
+    logs = module_db.getip_all_logs()
+    # print(logs)
+    return render_template('admin.html', logs=logs)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, debug=True)

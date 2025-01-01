@@ -21,6 +21,17 @@ def insert_user(id, password, name, email, phone, admin=False):
     conn.close()
     return result
 
+def check_admin(id):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM user WHERE id=?", (id,))
+    result = cursor.fetchone()
+    conn.close()
+    if result[5] == 1:
+        return True
+    else:
+        return False
+
 def select_user(id):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -162,10 +173,26 @@ def get_logs(id):
     conn.close()
     return result
 
+def get_all_logs():
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM logs")
+    result = cursor.fetchall()
+    conn.close()
+    return result
+
 def get_ips(id):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM iplogs WHERE userid=?", (id,))
+    result = cursor.fetchall()
+    conn.close()
+    return result
+
+def getip_all_logs():
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM iplogs")
     result = cursor.fetchall()
     conn.close()
     return result
