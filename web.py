@@ -38,13 +38,19 @@ def login():
         return """<script>alert("No such user");location.href="/";</script>"""
     if user[1] != password:
         return """<script>alert("Wrong password");location.href="/";</script>"""
+    td = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+    module_db.insert_log(id, "login", td)
+    module_db.insert_iplog(id, request.remote_addr, td)
     session['id'] = id
     return redirect(url_for('home'))
 
 @app.route('/apiweb/logout', methods=['POST', 'GET'])
 def logout():
+    td = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+    module_db.insert_iplog(session['id'], request.remote_addr, td)
+    module_db.insert_log(session['id'], "logout", td)
     session.pop('id', None)
     return redirect(url_for('home'))
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=80, debug=True)

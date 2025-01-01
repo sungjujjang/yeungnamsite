@@ -116,6 +116,32 @@ def select_comment(id):
     conn.close()
     return result
 
+def insert_iplog(userid, ip, date):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO iplogs VALUES (?, ?, ?)", (userid, ip, date))
+    try:
+        cursor.execute("SELECT * FROM iplogs WHERE userid=? AND ip=? AND date=?", (userid, ip, date))
+        result = cursor.fetchone()
+    except:
+        result = None
+    conn.commit()
+    conn.close()
+    return result
+
+def insert_log(userid, action, date):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO logs VALUES (?, ?, ?)", (userid, date, action))
+    try:
+        cursor.execute("SELECT * FROM logs WHERE userid=? AND date=? AND action=?", (userid, date, action))
+        result = cursor.fetchone()
+    except:
+        result = None
+    conn.commit()
+    conn.close()
+    return result
+
 def get_logs(id):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
