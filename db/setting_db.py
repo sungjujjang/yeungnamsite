@@ -23,6 +23,14 @@ def create_table():
     # all date is in format 'YYYYMMDDHHMMSS'
     conn.commit()
     conn.close()
+    
+def addtable():
+    conn = sqlite3.connect(settings.db_path)
+    cursor = conn.cursor()
+    cursor.execute('''CREATE TABLE post_comment 
+                        (id INTEGER PRIMARY KEY AUTOINCREMENT, content text, date text, writerid text, postid integer)''')
+    conn.commit()
+    conn.close()
 
 def insert_admin():
     conn = sqlite3.connect('db.db')

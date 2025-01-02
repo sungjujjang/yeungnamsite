@@ -127,6 +127,27 @@ def insert_comment(content, date, writerid, postid):
     conn.close()
     return result
 
+def add_post_view(id):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("UPDATE post SET views=views+1 WHERE id=?", (id,))
+    conn.commit()
+    conn.close()
+    
+def add_notice_view(id):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("UPDATE notice SET views=views+1 WHERE id=?", (id,))
+    conn.commit()
+    conn.close()
+
+def delete_notice(id):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM notice WHERE id=?", (id,))
+    conn.commit()
+    conn.close()
+
 def select_comment(id):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()

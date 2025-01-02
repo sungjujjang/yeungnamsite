@@ -23,8 +23,11 @@
         <a href="/notice" class="text-blue-500 hover:underline mb-4 inline-block">Go back</a>
         <h1 class="text-xl font-bold mb-4">영남소식 - {{ notice[1] }}</h1>
         <strong class="text-lg font-bold mb-2">{{ notice[4] }} - {{ datetext }}</strong>
+        <strong class="text-lg font-bold mb-2">{{ notice[-1] }} views</strong>
         <div class="border p-4 mb-4">
-            {{ notice[2] }}
+            {% for ct in notice[2] %}
+            <p>{{ ct }}</p>
+            {% endfor %}
         </div>
         <h2 class="text-lg font-bold mb-2">{{ lencom }} comments</h2>
         <div class="mb-4">

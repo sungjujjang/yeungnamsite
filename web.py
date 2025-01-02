@@ -116,6 +116,27 @@ def admin_page():
     # print(logs)
     return render_template('admin.html', logs=logs)
 
+@app.route('/admin/post')
+def admin_post_page():
+    if session.get('id') is None:
+        return redirect(url_for('home'))
+    if not module_db.check_admin(session['id']):
+        return redirect(url_for('home'))
+    return render_template('admin_post.html')
+
+@app.route('/webapi/add/notice', methods=['POST'])
+def webapi_notice():
+    if session.get('id') is None:
+        return redirect(url_for('home'))
+    if not module_db.check_admin(session['id']):
+        return redirect(url_for('home'))
+    data = request.form
+    title = data['title']
+    content = data['content']
+    td = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+    module_db.insert_notice(title, content, td, session['id'])
+    return """<script>alert("공지사항이 등록되었습니다.");location.href="/";</script>"""
+
 @app.route('/notice')
 def notice_page():
     # get query page
@@ -136,11 +157,16 @@ def notice_page():
     else:
         r_lenpage = lenpage
     print(lenpage)
-    return render_template('notice.html', notices=notices, lenpage=r_lenpage, page=page)
+    if module_db.check_admin(session.get('id')):
+        return render_template('notice.html', notices=notices, lenpage=r_lenpage, page=page, admin=True)
+    else:
+        return render_template('notice.html', notices=notices, lenpage=r_lenpage, page=page, admin=False)
 
 @app.route('/notice/<int:id>')
 def notice_detail(id):
     notice = module_db.select_notice(id)
+    notice = list(notice)
+    notice[2] = notice[2].split('\n')
     comments = module_db.select_comment(id)
     try:
         lencom = len(comments)
@@ -149,6 +175,7 @@ def notice_detail(id):
     if comments is None:
         comments = []
     datetext = date.make_date_text(date.date_sliser(notice[3]))
+    module_db.add_notice_view(id)
     for i in range(len(comments)):
         comments[i] = list(comments[i])
         comments[i][2] = date.make_date_text(date.date_sliser(comments[i][2]))
@@ -166,6 +193,15 @@ def notice_commit():
     td = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
     module_db.insert_comment(comment, td, id, noticeid)
     return jsonify(message="댓글이 등록되었습니다.")
+
+@app.route('/apiweb/notice/delete/<int:id>', methods=['GET'])
+def notice_delete(id):
+    if session.get('id') is None:
+        return redirect(url_for('home'))
+    if not module_db.check_admin(session['id']):
+        return redirect(url_for('home'))
+    module_db.delete_notice(id)
+    return """<script>alert("공지사항이 삭제되었습니다.");location.href="/notice";</script>"""
     
 
 if __name__ == '__main__':
