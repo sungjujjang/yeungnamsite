@@ -211,6 +211,14 @@ def get_all_logs():
     conn.close()
     return result
 
+def get_all_posts():
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM post ORDER BY id DESC")
+    result = cursor.fetchall()
+    conn.close()
+    return result
+
 def get_ips(id):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()

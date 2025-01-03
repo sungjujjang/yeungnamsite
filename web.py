@@ -69,7 +69,7 @@ def checkgung():
     if module_db.checkgung(_id):
         return jsonify(message="사용 불가능한 아이디 입니다. 이미 사용 중 입니다.")
     else:
-        return jsonify(message ="사용 가능한 아이디 입니다다.")
+        return jsonify(message ="사용 가능한 아이디 입니다.")
     
 
 @app.route('/apiweb/register', methods=['POST'])
@@ -148,7 +148,7 @@ def notice_page():
     all_notices = module_db.get_all_notices()
     notices = all_notices[(page-1)*10:page*10]
     o_lenpage = int(len(all_notices) / 10 + 1)
-    lenpage = range(1, o_lenpage)
+    lenpage = range(1, o_lenpage+1)
     if o_lenpage > 6:
         if page < 4:
             r_lenpage = lenpage[:6]
@@ -161,6 +161,29 @@ def notice_page():
         return render_template('notice.html', notices=notices, lenpage=r_lenpage, page=page, admin=True)
     else:
         return render_template('notice.html', notices=notices, lenpage=r_lenpage, page=page, admin=False)
+
+@app.route('/post', methods=['GET'])
+def post_page():
+    page = request.args.get('page')
+    if page is None:
+        page = 1
+    else:
+        page = int(page)
+    all_posts = module_db.get_all_posts()
+    posts = all_posts[(page-1)*10:page*10]
+    o_lenpage = int(len(all_posts) / 10 + 1)
+    print(o_lenpage)
+    lenpage = range(1, o_lenpage+1)
+    if o_lenpage > 6:
+        if page < 4:
+            r_lenpage = lenpage[:6]
+        else:
+            r_lenpage = lenpage[int(page)-3:int(page)+3]
+    else:
+        r_lenpage = lenpage
+    print(lenpage)
+    print(session.get('id'))
+    return render_template('post.html', posts=posts, lenpage=r_lenpage, page=page, username=session.get('id'), admin=module_db.check_admin(session.get('id')))
 
 @app.route('/notice/<int:id>')
 def notice_detail(id):

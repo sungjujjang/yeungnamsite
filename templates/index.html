@@ -19,7 +19,7 @@
             <nav class="space-x-4">
                 <a href="{{ url_for('introduction_page') }}" class="text-gray-600 hover:text-gray-900">소개</a>
                 <a href="{{ url_for('notice_page') }}" class="text-gray-600 hover:text-gray-900">소식</a>
-                <a href="#" class="text-gray-600 hover:text-gray-900">커뮤니티</a>
+                <a href="{{ url_for('post_page') }}" class="text-gray-600 hover:text-gray-900">커뮤니티</a>
             </nav>
         </header>
 
@@ -29,7 +29,7 @@
                 <ul>
                     {% for data in notices %}
                     <li class="flex justify-between mt-2">
-                        <span class="font-bold">{{ data[0] }}</span>
+                        <a href="/notice/{{data[0]}}"><span class="font-bold">{{ data[1] }}</span></a>
                         <span>{{ data[-1] }} views</span>
                     </li>
                     {% endfor %}
@@ -61,7 +61,7 @@
                 <ul>
                     {% for data in upposts %}
                     <li class="flex justify-between mt-2">
-                        <span class="font-bold">{{ data[0] }}</span>
+                        <a href="#"><span class="font-bold">{{ data[1] }}</span></a>
                         <span>{{ data[-3] }} 추천</span>
                     </li>
                     {% endfor %}
