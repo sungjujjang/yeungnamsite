@@ -10,6 +10,8 @@ def start_db():
     cur = con.cursor()    
     return con, cur
 
+
+
 app = Flask(__name__)
 app.secret_key = "Sungjujjang0702!!"
 
@@ -70,7 +72,6 @@ def checkgung():
         return jsonify(message="사용 불가능한 아이디 입니다. 이미 사용 중 입니다.")
     else:
         return jsonify(message ="사용 가능한 아이디 입니다.")
-    
 
 @app.route('/apiweb/register', methods=['POST'])
 def register():
@@ -182,8 +183,48 @@ def post_page():
     else:
         r_lenpage = lenpage
     print(lenpage)
-    print(session.get('id'))
-    return render_template('post.html', posts=posts, lenpage=r_lenpage, page=page, username=session.get('id'), admin=module_db.check_admin(session.get('id')))
+    if session.get('id'):
+        username = session['id']
+        if module_db.check_admin(session['id']):
+            admin = True
+        else:
+            admin = False
+    else:
+        admin = False
+        username = '.'.join(request.remote_addr.split('.')[2:4])
+    return render_template('post.html', posts=posts, lenpage=r_lenpage, page=page, username=username, admin=admin)
+
+@app.route('/post/<int:id>')
+def post_detail(id):
+    post = module_db.select_post(id)
+    post = list(post)
+    post[2] = post[2].split('\n')
+    comments = module_db.select_comment_post(id)
+    try:
+        lencom = len(comments)
+    except:
+        lencom = 0
+    if comments is None:
+        comments = []
+    datetext = date.make_date_text(date.date_sliser(post[3]))
+    module_db.add_post_view(id)
+    for i in range(len(comments)):
+        comments[i] = list(comments[i])
+        comments[i][2] = date.make_date_text(date.date_sliser(comments[i][2]))
+    return render_template('post_detail.html', post=post, comments=comments, lencom=lencom, datetext=datetext)
+
+@app.route('/apiweb/post/commit', methods=['POST'])
+def post_commit():
+    if session.get('id'):
+        id = session['id']
+    else:
+        id = '.'.join(request.remote_addr.split('.')[2:4])
+    data = request.get_json()
+    comment = data['comment']
+    postid = data['postid']
+    td = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+    module_db.insert_comment_post(comment, td, id, postid)
+    return jsonify(message="댓글이 등록되었습니다.")
 
 @app.route('/notice/<int:id>')
 def notice_detail(id):
@@ -209,7 +250,7 @@ def notice_commit():
     if session.get('id'):
         id = session['id']
     else:
-        id = '.'.join(request.remote_addr.split('.')[0:2])
+        id = '.'.join(request.remote_addr.split('.')[2:4])
     data = request.get_json()
     comment = data['comment']
     noticeid = data['noticeid']
@@ -217,6 +258,98 @@ def notice_commit():
     module_db.insert_comment(comment, td, id, noticeid)
     return jsonify(message="댓글이 등록되었습니다.")
 
+# session['uplist']
+@app.route('/apiweb/post_up/<int:id>', methods=['GET'])
+def post_up(id):
+    if session.get('uplist') is None:
+        session['uplist'] = []
+    if id in session['uplist']:
+        return f'<script>alert("이미 개추하셨습니다.");location.href="/post/{id}";</script>'
+    else:
+        session['uplist'].append(id)
+        session.modified = True
+        module_db.up_post(id)
+        return f'<script>alert("개추했습니다.");location.href="/post/{id}";</script>'
+
+# session['downlist']
+@app.route('/apiweb/post_down/<int:id>', methods=['GET'])
+def post_down(id):
+    if session.get('downlist') is None:
+        session['downlist'] = []
+    if id in session['downlist']:
+        return f'<script>alert("이미 비추를 눌렀습니다.");location.href="/post/{id}";</script>'
+    else:
+        session['downlist'].append(id)
+        session.modified = True
+        module_db.down_post(id)
+        return f'<script>alert("비추되었습니다.");location.href="/post/{id}";</script>'
+    
+@app.route('/post/add', methods=['GET'])
+def post_add_page():
+    return render_template('add_post.html')
+
+@app.route('/apiweb/post/delete/<int:id>', methods=['GET'])
+def post_delete(id):
+    if session.get('id') is None:
+        pid = '.'.join(request.remote_addr.split('.')[2:4])
+    else:
+        pid = session['id']
+    post = module_db.select_post(id)
+    print(post)
+    if post[4] != pid:
+        if module_db.check_admin(pid):
+            pass
+        else:
+            return """<script>alert("작성자만 삭제할 수 있습니다.");location.href="/post";</script>"""
+    module_db.delete_post(id)
+    return """<script>alert("게시글이 삭제되었습니다.");location.href="/post";</script>"""
+
+@app.route('/post/edit/<int:id>', methods=['GET'])
+def post_edit_page(id):
+    post = module_db.select_post(id)
+    if session.get('id') is None:
+        pid = '.'.join(request.remote_addr.split('.')[2:4])
+    else:
+        pid = session['id']
+    if post[4] != pid:
+        if module_db.check_admin(pid):
+            pass
+        else:
+            return """<script>alert("작성자만 수정할 수 있습니다.");location.href="/post";</script>"""
+    return render_template('edit_post.html', post=post)
+
+@app.route('/apiweb/post/edit', methods=['POST'])
+def edit_post():
+    data = request.form
+    pid = data['id']
+    post = module_db.select_post(pid)
+    if session.get('id') is None:
+        id = '.'.join(request.remote_addr.split('.')[2:4])
+    else:
+        id = session['id']
+    if post[4] != id:
+        if module_db.check_admin(id):
+            pass
+        else:
+            return """<script>alert("작성자만 수정할 수 있습니다.");location.href="/post";</script>"""
+    title = data['title']
+    content = data['content']
+    module_db.edit_post(pid, title, content)
+    return """<script>alert("게시글이 수정되었습니다.");location.href="/post";</script>"""
+
+@app.route('/apiweb/post/add', methods=['POST'])
+def post_add():
+    if session.get('id') is None:
+        id = '.'.join(request.remote_addr.split('.')[2:4])
+    else:
+        id = session['id']
+    data = request.form
+    title = data['title']
+    content = data['content']
+    td = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+    module_db.insert_post(title, content, td, id)
+    return """<script>alert("게시글이 등록되었습니다.");location.href="/post";</script>"""
+        
 @app.route('/apiweb/notice/delete/<int:id>', methods=['GET'])
 def notice_delete(id):
     if session.get('id') is None:

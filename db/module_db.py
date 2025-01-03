@@ -21,12 +21,63 @@ def insert_user(id, password, name, email, phone, admin=False):
     conn.close()
     return result
 
+def edit_post(id, title, content):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("UPDATE post SET title=?, content=? WHERE id=?", (title, content, id))
+    conn.commit()
+    conn.close()
+
+def delete_post(id):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM post WHERE id=?", (id,))
+    conn.commit()
+    conn.close()
+
+def up_post(id):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("UPDATE post SET up=up+1 WHERE id=?", (id,))
+    conn.commit()
+    conn.close()
+    
+def down_post(id):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("UPDATE post SET down=down+1 WHERE id=?", (id,))
+    conn.commit()
+    conn.close()
+
+def select_comment_post(id):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM comment WHERE postid=? ORDER BY id DESC", (id,))
+    result = cursor.fetchall()
+    conn.close()
+    return result
+
+def insert_comment_post(content, date, writerid, postid):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO comment VALUES (NULL, ?, ?, ?, ?)", (content, date, writerid, postid))
+    try:
+        cursor.execute("SELECT * FROM comment WHERE content=? AND date=? AND writerid=? AND postid=?", (content, date, writerid, postid))
+        result = cursor.fetchone()
+    except:
+        result = None
+    conn.commit()
+    conn.close()
+    return result
+
 def check_admin(id):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM user WHERE id=?", (id,))
     result = cursor.fetchone()
     conn.close()
+    if result is None:
+        return False
     if result[5] == 1:
         return True
     else:

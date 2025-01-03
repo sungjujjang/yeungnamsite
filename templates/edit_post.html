@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ post[1] }} 수정</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="bg-white shadow-md rounded-lg p-8 max-w-lg w-full">
+        <a href="/post" class="text-blue-500 hover:underline mb-4 inline-block">Go back</a>
+        <h1 class="text-2xl font-bold mb-6"><strong>{{ post[1] }}</strong>수정</h1>
+        <form action="{{ url_for('edit_post') }}" method="post">
+            <div class="mb-4">
+                <label for="title" class="block text-gray-700 mb-2">제목</label>
+                <input type="text" id="title" name="title" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="제목을 입력하세요" value="{{ post[1] }}">
+            </div>
+            <div class="mb-6">
+                <label for="content" class="block text-gray-700 mb-2">내용</label>
+                <textarea id="content" name="content" rows="6" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="내용을 입력하세요">{{ post[2] }}</textarea>
+            </div>
+            <input type="hidden" name="id" value="{{ post[0] }}">
+            <a href="{{ url_for('post_delete', id=post[0]) }}" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full">삭제하기</a>
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">수정하기</button>
+        </form>
+    </div>
+</body>
+</html>

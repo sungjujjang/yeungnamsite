@@ -28,19 +28,19 @@
                 <thead>
                     <tr>
                         <th class="py-2 px-4 border-b">제목</th>
-                        <th class="py-2 px-4 border-b">추천수</th>
+                        <th class="py-2 px-4 border-b">조회수</th>
                         <th class="py-2 px-4 border-b">작성자</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for data in posts %}
                     <tr>
-                        <td class="py-2 px-4 border-b"><a href="{{ url_for('post_page', id=data[0]) }}">{{ data[1] }}</a></td>
-                        <td class="py-2 px-4 border-b">{{ data[-3] }}회</td>
+                        <td class="py-2 px-4 border-b"><a href="{{ url_for('post_detail', id=data[0]) }}">{{ data[1] }}</a></td>
+                        <td class="py-2 px-4 border-b">{{ data[-1] }}회</td>
                         <td class="py-2 px-4 border-b">{{ data[-4] }}</td>
                         {% if username == data[-4] or admin %}
                         <td>
-                            <a href="{{ url_for('notice_delete', id=data[0]) }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">편집하기</a>
+                            <a href="{{ url_for('post_edit_page', id=data[0]) }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">편집하기</a>
                         </td>
                         {% endif %}
                     </tr>
@@ -48,6 +48,8 @@
                 </tbody>
             </table>
         </div>
+        <br />
+        <a href="/post/add" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow">글 작성</a>
         <br />
         <div class='atag'> 
             {% for i in lenpage %}

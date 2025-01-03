@@ -61,7 +61,7 @@
                 <ul>
                     {% for data in upposts %}
                     <li class="flex justify-between mt-2">
-                        <a href="#"><span class="font-bold">{{ data[1] }}</span></a>
+                        <a href="{{ url_for('post_detail', id=data[0]) }}"><span class="font-bold">{{ data[1] }}</span></a>
                         <span>{{ data[-3] }} 추천</span>
                     </li>
                     {% endfor %}
